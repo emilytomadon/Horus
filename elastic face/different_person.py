@@ -91,7 +91,7 @@ if __name__ == "__main__":
     model.load_state_dict(torch.load('C:/Users/emily/Downloads/295672backbone.pth', map_location='cpu'))  # Model downloaded from ElasticFace GitHub
 
     base_directory = 'C:/Users/emily/Downloads/RFW_dataset/separacao/clusters'
-    csv_filename = 'C:/Users/emily/OneDrive/Documents/IC/resultados/elasticface/clusterizacaoFalse_elasticface.csv'
+    csv_filename = 'C:/Users/emily/OneDrive/Documents/IC/resultados/elasticface/clusteringFalse_elasticface.csv'
     total_comparisons = 6000  # Total number of comparisons
 
     # Save results
