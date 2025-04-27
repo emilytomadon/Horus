@@ -61,11 +61,11 @@ def update_csv_with_distances(input_csv_path, output_csv_path):
 
     print(f"Cosine distances calculated and saved to {output_csv_path} successfully.")
 
-sp_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\SamePerson_train.csv'
-dp_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\DifferentPerson_train.csv'
+sp_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\SamePerson_train.csv'
+dp_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\DifferentPerson_train.csv'
 
-sp_out_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\SamePerson_train_arcface.csv'
-dp_out_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\DifferentPerson_train_arcface.csv'
+sp_out_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\arcface\SamePerson_train_arcface.csv'
+dp_out_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\arcface\DifferentPerson_train_arcface.csv'
 
 update_csv_with_distances(sp_csv_path, sp_out_csv_path)
 update_csv_with_distances(dp_csv_path, dp_out_csv_path)
