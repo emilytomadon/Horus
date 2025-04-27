@@ -1,0 +1,73 @@
+import os
+import csv
+import torch
+from facenet_pytorch import MTCNN, InceptionResnetV1
+from scipy.spatial.distance import cosine
+from PIL import Image
+
+train_dir = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters'
+
+mtcnn = MTCNN(image_size=160)
+model = InceptionResnetV1(pretrained='vggface2').eval()
+
+def get_embedding(image_path):
+    img = Image.open(image_path).convert('RGB')
+    face = mtcnn(img)
+    if face is not None:
+        face = face.unsqueeze(0)
+        with torch.no_grad():
+            embedding = model(face).squeeze(0).numpy()
+        return embedding
+    else:
+        return None
+
+def calculate_distance(embedding_a, embedding_b):
+    return cosine(embedding_a, embedding_b)
+
+def update_csv_with_distances(input_csv_path, output_csv_path):
+    with open(input_csv_path, mode='r', newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        rows = list(reader)
+
+    updated_rows = []
+    header = rows[0]
+    if len(header) == 2:
+        updated_rows.append(['Image A', 'Image B', 'Cosine Distance'])
+    else:
+        updated_rows.append(['Image A', 'Image B', 'Cluster', 'Cosine Distance'])
+
+    for row in rows[1:]:
+        img_a, img_b = row[0], row[1]
+        cluster = row[2] if len(row) > 2 else None
+
+        if cluster is not None:
+            img_a_path = os.path.join(train_dir, f'cluster_{cluster}', img_a)
+            img_b_path = os.path.join(train_dir, f'cluster_{cluster}', img_b)
+        else:
+            img_a_path = os.path.join(train_dir, img_a)
+            img_b_path = os.path.join(train_dir, img_b)
+        
+        embedding_a = get_embedding(img_a_path)
+        embedding_b = get_embedding(img_b_path)
+
+        if embedding_a is not None and embedding_b is not None:
+            dist = calculate_distance(embedding_a, embedding_b)
+            if cluster is not None:
+                updated_rows.append([img_a, img_b, cluster, dist])
+            else:
+                updated_rows.append([img_a, img_b, dist])
+
+    with open(output_csv_path, mode='w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(updated_rows)
+
+    print(f"Cosine distances calculated and saved to {output_csv_path} successfully.")
+
+sp_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\SamePerson_train.csv'
+dp_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\DifferentPerson_train.csv'
+
+sp_out_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\facenet\SamePerson_train_facenet.csv'
+dp_out_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\facenet\DifferentPerson_train_facenet.csv'
+
+update_csv_with_distances(sp_csv_path, sp_out_csv_path)
+update_csv_with_distances(dp_csv_path, dp_out_csv_path)
