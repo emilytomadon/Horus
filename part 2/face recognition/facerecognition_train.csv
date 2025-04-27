@@ -1,0 +1,71 @@
+import os
+import csv
+import face_recognition
+import pandas as pd
+from scipy.spatial.distance import cosine
+
+base_path = r"C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters"
+
+def compare_images(image_path_1, image_path_2):
+    image_1 = face_recognition.load_image_file(image_path_1)
+    image_2 = face_recognition.load_image_file(image_path_2)
+
+    encoding_1 = face_recognition.face_encodings(image_1)
+    encoding_2 = face_recognition.face_encodings(image_2)
+
+    if encoding_1 and encoding_2:
+        encoding_1 = encoding_1[0]
+        encoding_2 = encoding_2[0]
+        
+        distance = face_recognition.face_distance([encoding_1], encoding_2)[0]
+        same_person = face_recognition.compare_faces([encoding_1], encoding_2)[0]
+
+        return distance, same_person
+    else:
+        return None, None
+
+def update_csv_with_distances(input_csv_path, output_csv_path):
+    with open(input_csv_path, mode='r', newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        rows = list(reader)
+
+    updated_rows = []
+    header = rows[0]
+    if len(header) == 2:
+        updated_rows.append(['Image A', 'Image B', 'Cosine Distance'])
+    else:
+        updated_rows.append(['Image A', 'Image B', 'Cluster', 'Cosine Distance'])
+
+    for row in rows[1:]:
+        img_a, img_b = row[0], row[1]
+        cluster = row[2] if len(row) > 2 else None
+
+        if cluster is not None:
+            img_a_path = os.path.join(base_path, f'cluster_{cluster}', img_a)
+            img_b_path = os.path.join(base_path, f'cluster_{cluster}', img_b)
+        else:
+            img_a_path = os.path.join(base_path, img_a)
+            img_b_path = os.path.join(base_path, img_b)
+
+        distance, same_person = compare_images(img_a_path, img_b_path)
+
+        if distance is not None:
+            if cluster is not None:
+                updated_rows.append([img_a, img_b, cluster, distance, same_person])
+            else:
+                updated_rows.append([img_a, img_b, distance, same_person])
+
+    with open(output_csv_path, mode='w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(updated_rows)
+
+    print(f"Cosine distances calculated and saved to {output_csv_path} successfully.")
+
+sp_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\SamePerson_train.csv'
+dp_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\DifferentPerson_train.csv'
+
+sp_out_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\face recognition\SamePerson_train_fr.csv'
+dp_out_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\face recognition\DifferentPerson_train_fr.csv'
+
+update_csv_with_distances(sp_csv_path, sp_out_csv_path)
+update_csv_with_distances(dp_csv_path, dp_out_csv_path)
