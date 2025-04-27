@@ -9,7 +9,6 @@ from PIL import Image
 
 train_dir = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters'
 
-# InsightFace model
 model = insightface.app.FaceAnalysis(name='buffalo_l')
 model.prepare(ctx_id=-1)  # CPU
 
@@ -18,16 +17,15 @@ def get_embedding(image_path):
     faces = model.get(img)
     return faces[0].embedding if faces else None
 
-# cosine distance
 def calculate_distance(embedding_a, embedding_b):
     return cosine(embedding_a, embedding_b)
 
-def update_csv_with_distances(csv_path):
-    # Read the existing CSV
-    with open(csv_path, mode='r', newline='') as csvfile:
+def update_csv_with_distances(input_csv_path, output_csv_path):
+    with open(input_csv_path, mode='r', newline='') as csvfile:
         reader = csv.reader(csvfile)
         rows = list(reader)
 
+    # Update pairs with cosine distances
     updated_rows = []
     header = rows[0]
     if len(header) == 2:
@@ -57,14 +55,17 @@ def update_csv_with_distances(csv_path):
             else:
                 updated_rows.append([img_a, img_b, dist])
 
-    with open(csv_path, mode='w', newline='') as csvfile:
+    with open(output_csv_path, mode='w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(updated_rows)
 
-    print(f"Cosine distances calculated and CSV {csv_path} updated successfully.")
+    print(f"Cosine distances calculated and saved to {output_csv_path} successfully.")
 
-sp_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\SamePerson_train.csv'
-dp_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\DifferentPerson_train.csv'
+sp_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\SamePerson_train.csv'
+dp_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\DifferentPerson_train.csv'
 
-update_csv_with_distances(sp_csv_path)
-update_csv_with_distances(dp_csv_path)
+sp_out_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\SamePerson_train_arcface.csv'
+dp_out_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\DifferentPerson_train_arcface.csv'
+
+update_csv_with_distances(sp_csv_path, sp_out_csv_path)
+update_csv_with_distances(dp_csv_path, dp_out_csv_path)
