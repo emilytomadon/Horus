@@ -1,0 +1,58 @@
+import os
+import csv
+import pandas as pd
+from deepface import DeepFace
+
+base_path = r"C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters"
+
+def compare_images(image_path_1, image_path_2):
+    result = DeepFace.verify(image_path_1, image_path_2, model_name="ArcFace", distance_metric="cosine", enforce_detection=False)
+    distance = result['distance']
+    same_person = distance < 0.68
+    return distance, same_person
+
+def update_csv_with_distances(input_csv_path, output_csv_path):
+    with open(input_csv_path, mode='r', newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        rows = list(reader)
+
+    updated_rows = []
+    header = rows[0]
+    if len(header) == 2:
+        updated_rows.append(['Image A', 'Image B', 'Cosine Distance'])
+    else:
+        updated_rows.append(['Image A', 'Image B', 'Cluster', 'Cosine Distance'])
+
+    for row in rows[1:]:
+        img_a, img_b = row[0], row[1]
+        cluster = row[2] if len(row) > 2 else None
+
+        if cluster is not None:
+            img_a_path = os.path.join(base_path, f'cluster_{cluster}', img_a)
+            img_b_path = os.path.join(base_path, f'cluster_{cluster}', img_b)
+        else:
+            img_a_path = os.path.join(base_path, img_a)
+            img_b_path = os.path.join(base_path, img_b)
+
+        distance, same_person = compare_images(img_a_path, img_b_path)
+
+        if distance is not None:
+            if cluster is not None:
+                updated_rows.append([img_a, img_b, cluster, distance, same_person])
+            else:
+                updated_rows.append([img_a, img_b, distance, same_person])
+
+    with open(output_csv_path, mode='w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(updated_rows)
+
+    print(f"Cosine distances calculated and saved to {output_csv_path} successfully.")
+
+sp_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\SamePerson_train.csv'
+dp_csv_path = r'C:\Users\emily\Downloads\RFWsummarized_split\RFWsummarized_split\train\clusters\DifferentPerson_train.csv'
+
+sp_out_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\deep face\SamePerson_train_dp.csv'
+dp_out_csv_path = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\deep face\DifferentPerson_train_dp.csv'
+
+update_csv_with_distances(sp_csv_path, sp_out_csv_path)
+update_csv_with_distances(dp_csv_path, dp_out_csv_path)
