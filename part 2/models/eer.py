@@ -40,7 +40,7 @@ def calculate_eer(df, cluster, possible_thresholds):
     return eer, best_threshold
 
 # example
-csv_sp = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\deep face\DifferentPerson_train_dp.csv' 
+csv_sp = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\deep face\SamePerson_train_dp.csv' # (sp = same person)
 csv_dp = r'C:\Users\emily\OneDrive\Documents\IC\algorithms\deep face\DifferentPerson_train_dp.csv'
 
 df_sp = pd.read_csv(csv_sp)
