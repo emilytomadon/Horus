@@ -9,7 +9,7 @@ def calculate_fp_fn_far_frr(df, cluster, threshold):
     total_pos_pairs = len(df_cluster[df_cluster['Label'] == 1])
     
     for _, row in df_cluster.iterrows():
-        score = row['Distance']
+        score = row['Cosine Distance']
         label = row['Label']
         prediction = int(score <= threshold)
         
