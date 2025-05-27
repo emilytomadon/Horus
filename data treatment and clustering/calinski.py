@@ -1,5 +1,5 @@
 from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_samples, silhouette_score
+from sklearn.metrics import calinski_harabasz_score
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
@@ -14,21 +14,21 @@ def kmeans_clusters(embeddings, n: int):
 
 if __name__ == '__main__':
     embeddings_array = np.load(EMBEDDINGS_ARRAY_PATH)
-    silhouette_averages = []
+    calinski_harabasz_score_averages = []
     for i in range(4, CLUSTERS_MAX):
         cluster_labels = kmeans_clusters(embeddings_array, i)
-        silhouette_avg = silhouette_score(embeddings_array, cluster_labels)
-        silhouette_averages.append(silhouette_avg)
-        print("For n_clusters =",i,"The average silhouette_score is :", silhouette_avg)
+        cscore_avg = calinski_harabasz_score(embeddings_array, cluster_labels)
+        calinski_harabasz_score_averages.append(cscore_avg)
+        print("For n_clusters =",i,"The average calinski_score is :", cscore_avg)
 
-    silhouette_averages_array = np.array(silhouette_averages)
-    np.save("silhouette-averages-rfw.npy", silhouette_averages_array)
+    calinski_harabasz_score_averages_array = np.array(calinski_harabasz_score_averages)
+    np.save("calinski-averages-rfw-griaule.npy", calinski_harabasz_score_averages_array)
 
     fig=plt.subplots(figsize=(10,5))
-    plt.plot(range(4, CLUSTERS_MAX), silhouette_averages, 'o-')
+    plt.plot(range(4, CLUSTERS_MAX), calinski_harabasz_score_averages, 'o-')
     plt.xlabel('Number of Clusters')
-    plt.ylabel('Silhouette')
-    plt.title('Silhouette Score')
+    plt.ylabel('Score')
+    plt.title('Calinski-Harabasz Score')
     plt.xticks(range(4, CLUSTERS_MAX))
     plt.grid(True)
     plt.show()
